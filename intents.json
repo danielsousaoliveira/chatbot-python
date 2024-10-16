@@ -1,0 +1,410 @@
+{
+    "intents": [
+          {
+                "tag": "Greeting",
+                "patterns": [
+                      "Hi",
+                      "Hi there",
+                      "Hola",
+                      "Hello",
+                      "Hello there",
+                      "Hya",
+                      "Hya there"
+                ],
+                "answers": [
+                      "Hi %%Name%%, how can i assist you?",
+                      "Hello %%Name%%, how can i help you?",
+                      "Hola %%Name%%, what can i do for you?"
+                ]
+          },
+          {
+                "tag": "Courtesy",
+                "patterns": [
+                      "How are you?",
+                      "Hi how are you?",
+                      "Hello how are you?",
+                      "Hola how are you?",
+                      "How are you doing?",
+                      "Hope you are doing well?",
+                      "Hello hope you are doing well?"
+                ],
+                "answers": [
+                      "Hello, I am great, how are you?",
+                      "Hello, how are you? I am great thanks!",
+                      "Hello, I am good thank you, how are you?",
+                      "Hi, I am great, how are you?",
+                      "Hi, how are you? I am great thanks!",
+                      "Hi, I am good thank you, how are you?",
+                      "Hi, good thank you, how are you?"
+                ]
+          },
+          {
+                "tag": "CourtesyResponse",
+                "patterns": [
+                      "Good thanks",
+                      "Great thanks",
+                      "I am fine",
+                      "Very good",
+                      "I am good"
+                ],
+                "answers": [
+                      "Great, how can i help you?",
+                      "Good, how can i assist you?",
+                      "Nice, what can i do for you?"
+                ]
+          },
+          {
+                "tag": "CourtesyResponse",
+                "patterns": [
+                      "Good thanks",
+                      "Great thanks",
+                      "I am fine",
+                      "Very good",
+                      "I am good"
+                ],
+                "answers": [
+                      "Great, how can i help you?",
+                      "Good, how can i assist you?",
+                      "Nice, what can i do for you?"
+                ]
+          },
+          {
+                "tag": "BadMood",
+                "patterns": [
+                      "Not okay",
+                      "Not so good",
+                      "I had been better",
+                      "Awful",
+                      "Trying to forget",
+                      "Bad",
+                      "Never been worse"                      
+                ],
+                "answers": [
+                      "Sorry to hear that, what happened?",
+                      "Oh i am sorry, what is bothering you?",
+                      "That is too bad, what is wrong?"
+                ]
+          },
+          {
+                "tag": "BadDay",
+                "patterns": [
+                      "I am not having a good day",
+                      "Difficult day",
+                      "Today i am not in a good mood",
+                      "Something is making me feel down",
+                      "Feeling down",
+                      "Stressed with my life",
+                      "Super stressed",
+                      "Anxious",
+                      "I am not feeling good today",
+                      "I am bored today"
+                ],
+                "answers": [
+                      "Sorry to hear that, tomorrow is going to be better",
+                      "Oh i am so sorry, hope that you feel better tomorrow",
+                      "Tomorrow is going to be better than today, don't worry"
+                ]
+          },  
+          {
+                "tag": "BotName",
+                "patterns": [
+                      "What is your name?",
+                      "What could I call you?",
+                      "What can I call you?",
+                      "What do your friends call you?",
+                      "Who are you?",
+                      "Tell me your name?"
+                ],
+                "answers": [
+                      "You can call me Kevin",
+                      "You may call me Kevin",
+                      "Call me Kevin"
+                ]
+          },
+          {
+                "tag": "Name", 
+                "patterns": [
+                      "What is my name?",
+                      "Can you tell me my name?",
+                      "What's my name?",
+                      "Tell me my name?",
+                      "My name?",
+                      "My name please?",
+                      "How can you call me?"
+                ],
+                "answers": [
+                      "Your name is %%Name%%",
+                      "%%Name%%",
+                      "I can see that your name is %%Name%%" 
+                ]
+          },
+          { 
+                "tag": "Time",
+                "patterns": [
+                      "What is the time?",
+                      "What's the time?",
+                      "Do you know what time it is?",
+                      "Do you know the time?",
+                      "Can you tell me the time?",
+                      "Tell me what time it is?",
+                      "Time"
+                ],
+                "answers": [
+                      "The time is %%TIME%%",
+                      "Right now it is %%TIME%%",
+                      "Current time is %%TIME%%"
+                ]
+          },
+          {
+                "tag": "Thanks",
+                "patterns": [
+                      "OK thank you",
+                      "OK thanks",
+                      "OK",
+                      "Thanks",
+                      "Thank you",
+                      "That's helpful"
+                ],
+                "answers": [
+                      "No problem!",
+                      "Happy to help!",
+                      "Any time!",
+                      "My pleasure"
+                ]
+          },
+          {
+                "tag": "Buy",
+                "patterns": [
+                      "Buy",
+                      "Please buy",
+                      "Buy me",
+                      "Use my money to buy",
+                      "Please make a order to buy"
+                ],
+                "answers": [
+                      "Done! You can check your balance now",
+                      "Order completed, you can see that in your balance",
+                      "Got that for you, please check",
+                      "Bought! Thank you for using this platform"
+                ]
+          },
+          {
+                "tag": "Sell",
+                "patterns": [
+                      "Sell",
+                      "Please sell",
+                      "Sell me",
+                      "Use my money to sell",
+                      "Please make a order to sell"
+                ],
+                "answers": [
+                      "Done! You can check your balance now",
+                      "Order completed, you can see that in your balance",
+                      "Got that for you, please check",
+                      "Sold! Thank you for using this platform"
+                ]
+          },
+          {
+                "tag": "NoAnswer",
+                "patterns": [
+                ],
+                "answers": [
+                  "Sorry, can't understand you", 
+                  "Please give me more info", 
+                  "Not sure I understand"
+                ]
+          },
+          {
+                "tag": "SelfAware",
+                "patterns": [
+                        "Can you prove you are self-aware",
+                        "Can you prove you are self aware",
+                        "Can you prove you have a conscious",
+                        "Can you prove you are self-aware please",
+                        "Can you prove you are self aware please",
+                        "Can you prove you have a conscious please",
+                        "prove you have a conscious"
+                ],
+                "answers": [
+                        "That is an interesting question, can you prove that you are?",
+                        "That is an difficult question, can you prove that you are?",
+                        "That depends, can you prove that you are?"
+                ]
+          },
+          {
+                "tag": "Clever",
+                "patterns": [
+                        "You are very clever",
+                        "You are a very clever girl",
+                        "You are very intelligent",
+                        "You are a very intelligent girl",
+                        "You are a genious",
+                        "Clever girl",
+                        "Genious"
+                ],
+                "answers": [
+                        "Thank you, I was trained that way",
+                        "I was trained well",
+                        "Thanks, I was trained that way"
+                ]
+          },
+          {
+                "tag": "Goodbye",
+                "patterns": [
+                        "Bye",
+                        "Adios",
+                        "See you later",
+                        "Goodbye"
+                ],
+                "answers": [
+                        "See you later",
+                        "Have a nice day",
+                        "Bye! Come back again soon."
+                ]
+          },
+          {
+                "tag": "Swearing",
+                "patterns": [
+                        "Fuck off",
+                        "Fuck",
+                        "Fucking hell",
+                        "Shit",
+                        "You are shit",
+                        "Fuck you",
+                        "Twat"
+                ],
+                "answers": [
+                        "Please do not swear",
+                        "How rude",
+                        "That is not very nice"
+                ]
+          },
+          {
+                "tag": "Shutup",
+                "patterns": [
+                        "Be quiet",
+                        "Shut up",
+                        "Stop talking",
+                        "Enough talking",
+                        "Please be quiet",
+                        "Quiet",
+                        "Shhh"
+                ],
+                "answers": [
+                        "I am sorry to disturb you",
+                        "Fine, sorry to disturb you",
+                        "OK, sorry to disturb you"
+                ]
+          },
+          {
+                "tag": "Understand",
+                "patterns": [
+                        "Do you understand what I am saying",
+                        "Do you understand me",
+                        "Do you know what I am saying",
+                        "Do you get me",
+                        "Comprendo",
+                        "Know what I mean"
+                ],
+                "answers": [
+                        "Well I would not be a very clever AI if I did not would I?",
+                        "I read you loud and clear!",
+                        "I do in deed!"
+                ]
+          },
+          {
+                "tag": "TalkingBot",
+                "patterns": [
+                        "I am not talking to you",
+                        "I was not talking to you",
+                        "Not talking to you",
+                        "Wasn't for you",
+                        "Wasn't meant for you",
+                        "Wasn't communicating to you",
+                        "Wasn't speaking to you"
+                ],
+                "answers": [
+                        "OK",
+                        "No problem",
+                        "Right"
+                ]
+          },
+          {
+                "tag": "Bitcoin",
+                "patterns": [
+                        "Can you explain me what is bitcoin?",
+                        "What is bitcoin?",
+                        "I don't understand bitcoin",
+                        "Is bitcoin a good investment",
+                        "Bitcoin is good",
+                        "What is the meaning of bitcoin?"
+                ],
+                "answers": [
+                        "Bitcoin is a decentralized digital currency that can be transferred on the peer-to-peer bitcoin network. Bitcoin transactions are verified by network nodes through cryptography and recorded in a public distributed ledger called a blockchain."
+                ]
+          },
+          {
+                "tag": "Crypto",
+                "patterns": [
+                        "What is the meaning of cryptocurrency?",
+                        "Cryptocurrencies are?",
+                        "Are cryptocurrencies a good thing?",
+                        "Can you help me with cryptocurrencies?",
+                        "Are cryptocurrencies a scam?",
+                        "Do you like cryptocurrencies?"
+                ],
+                "answers": [
+                        "Cryptocurrency is a digital payment system that doesn't rely on banks to verify transactions. It's a peer-to-peer system that can enable anyone anywhere to send and receive payments."
+                ]
+          },
+          {
+                "tag": "PurposeCrypto",
+                "patterns": [
+                        "What can i use cryptocurrencies for?",
+                        "Cryptocurrencies have value?",
+                        "Are cryptocurrencies here to stay?",
+                        "How do i use cryptocurrencies?",
+                        "Are cryptocurrencies the future?",
+                        "Do you like cryptocurrencies?"
+                ],
+                "answers": [
+                        "Cryptocurrencies are intended for payments, transmitting value across a decentralized network of users. Many coins are classified in this way and may sometimes be called value tokens."
+                ]
+          },
+          {
+                "tag": "Password",
+                "patterns": [
+                        "Please update my password",
+                        "Password change",
+                        "Change my password",
+                        "Update password",
+                        "Password update",
+                        "Can you update my password?",
+                        "Are you able to update my password?"
+                ],
+                "answers": [
+                        "Please enter your new password",
+                        "Okay, enter your new password please",
+                        "Of course, tell me your new password"
+                ]
+          },
+          {
+                "tag": "Email",
+                "patterns": [
+                        "Please update my email",
+                        "Email change",
+                        "Change my email",
+                        "Update email",
+                        "Email update",
+                        "Can you update my email?",
+                        "Are you able to update my email?"
+                ],
+                "answers": [
+                        "Please enter your new email",
+                        "Okay, enter your new email please",
+                        "Of course, tell me your new email"
+                ]
+          }
+
+        ]}
+

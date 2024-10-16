@@ -1,0 +1,69 @@
+<!--
+# 
+# File: home.html
+# Author: Daniel Oliveira
+# Mec. Number: 89208
+# Course: Sistemas Inteligentes II
+# Date: 17th June of 2022
+#
+
+### Home page interface ### 	
+-->
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>{% block title %}Home{% endblock %}</title>
+		<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
+	</head>
+	<body class="loggedin">
+		<nav class="navtop">
+			<div>
+				<h1>Cryptocurrency Exchange</h1>
+                <a href="{{ url_for('home') }}"><i class="fas fa-home"></i>Home</a>
+				<a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i>Logout</a>
+			</div>
+		</nav>
+		<div class="content">
+			{% block content %}
+            <h2>Home Page</h2>
+            <p>Welcome back, {{ name }}!</p>
+			<p>Your current BTC balance is: {{ balance }}</p>
+            {% endblock %}
+		</div>
+		<div class="container">
+			<div class="chatbox">
+				<div class="chatbox__support">
+					<div class="chatbox__header">
+						<div class="chatbox__circle">
+							<div class="chatbox__image--header">
+								<img src="{{ url_for('static', filename='images/icon.png') }}" alt="image">
+							</div>
+						</div>
+						<div class="chatbox__content--header">
+							<h4 class="chatbox__heading--header">Chat support</h4>
+							<p class="chatbox__description--header">Welcome back, {{ name }}!</p>
+						</div>
+					</div>
+					<div class="chatbox__messages">
+						<div></div>
+					</div>
+					<div class="chatbox__footer">
+						<input type="text" placeholder="Write a message...">
+						<button class="chatbox__send--footer send__button">Send</button>
+					</div>
+				</div>
+				<div class="chatbox__button">
+					<button><img src="{{ url_for('static', filename='images/icon.png') }}" /></button>
+				</div>
+			</div>
+		</div>
+		
+			<script type=text/javascript>
+				$SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+			</script>
+			<script type="text/javascript" src="{{ url_for('static', filename='app.js') }}"></script>
+	</body>
+</html>
