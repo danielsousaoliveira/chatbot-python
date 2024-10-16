@@ -8,7 +8,7 @@ Conversational agent using Python, Flask and Javascript
 
 ```bash
 $ git clone
-$ cd si2_mp
+$ cd chatbot-python
 $ python3 -m venv venv
 $ . venv/bin/activate
 ```
@@ -16,7 +16,7 @@ $ . venv/bin/activate
 2. Install dependencies and packages
 
 ```bash
-$ (venv) pip install -r requirements
+$ (venv) pip install -r requirements.txt
 $ (venv) python3
 
 > > > import nltk
