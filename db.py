@@ -1,4 +1,4 @@
-# 
+#
 # File: db.py
 # Author: Daniel Oliveira
 #
@@ -7,13 +7,29 @@
 
 ## Import dependencies ##
 
+import os
+from dotenv import load_dotenv
 from mysql.connector import connect, Error
+
+load_dotenv()
+
+## Helper to open a database connection using environment variables ##
+
+def get_connection(with_db=True):
+    kwargs = dict(
+        host=os.environ['MYSQL_HOST'],
+        user=os.environ['MYSQL_USER'],
+        password=os.environ['MYSQL_PASSWORD'],
+    )
+    if with_db:
+        kwargs['database'] = os.environ['MYSQL_DB']
+    return connect(**kwargs)
 
 ## Create MySQL Database, if there is none with the same name ##
 
 def createDB():
     try:
-        with connect(host="localhost", user="root", password="root") as connection:
+        with get_connection(with_db=False) as connection:
             create_db = "CREATE DATABASE IF NOT EXISTS `crexusers` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;"
             with connection.cursor() as cursor:
                 cursor.execute(create_db)
@@ -24,7 +40,7 @@ def createDB():
 
 def createTable():
     try:
-        with connect(host="localhost", user="root", password="root", database="crexusers") as connection:
+        with get_connection() as connection:
             create_table ="""CREATE TABLE IF NOT EXISTS `accounts` (
 	                      `id` int(11) NOT NULL AUTO_INCREMENT,
   	                      `username` varchar(50) NOT NULL,
@@ -42,7 +58,7 @@ def createTable():
 ## Print current database state ##
 
 def printDB():
-    connection = connect(host="localhost", user="root", password="root", database="crexusers")
+    connection = get_connection()
     show ="SELECT * FROM accounts"
     with connection.cursor() as cursor:
         cursor.execute(show)
@@ -53,9 +69,9 @@ def printDB():
 ## Create initial accounts with user data and insert them into the database ##
 
 def insertInitialAccounts():
-    connection = connect(host="localhost", user="root", password="root", database="crexusers")
-    ins = """INSERT INTO `accounts` (`id`, `username`, `name`, `password`, `email`, `balance`) 
-          VALUES 
+    connection = get_connection()
+    ins = """INSERT INTO `accounts` (`id`, `username`, `name`, `password`, `email`, `balance`)
+          VALUES
           (1, 'daniel', 'Daniel Oliveira', 'pass1', 'danielsoliveira@ua.pt', 0)
           """
     with connection.cursor() as cursor:
@@ -65,16 +81,15 @@ def insertInitialAccounts():
 ## Remove one chosen user ##
 
 def removeUser(user):
-    connection = connect(host="localhost", user="root", password="root", database="crexusers")
-    deluser = "DELETE FROM accounts WHERE username=" + user
+    connection = get_connection()
     with connection.cursor() as cursor:
-        cursor.execute(deluser)
+        cursor.execute("DELETE FROM accounts WHERE username = %s", (user,))
         connection.commit()
 
 ## Delete existing database ##
 
 def deleteDB():
-    connection = connect(host="localhost", user="root", password="root", database="crexusers")
+    connection = get_connection()
     deldb = "DROP DATABASE crexusers"
     with connection.cursor() as cursor:
         cursor.execute(deldb)
@@ -82,36 +97,29 @@ def deleteDB():
 
 ## Update user BTC balance, buying more or selling what he currently have ##
 
-def updateBalance(id,new,flag):
-    connection = connect(host="localhost", user="root", password="root", database="crexusers")
-    if flag:
-        update = "UPDATE accounts SET balance = balance + " + str(new) + " WHERE id = " + str(id)
-    else:
-        update = "UPDATE accounts SET balance = GREATEST(0, balance - " + str(new) + ") WHERE id = " + str(id)
+def updateBalance(id, new, flag):
+    connection = get_connection()
     with connection.cursor() as cursor:
-        cursor.execute(update)
+        if flag:
+            cursor.execute("UPDATE accounts SET balance = balance + %s WHERE id = %s", (new, id))
+        else:
+            cursor.execute("UPDATE accounts SET balance = GREATEST(0, balance - %s) WHERE id = %s", (new, id))
         connection.commit()
 
 ## Update user password on the database ##
 
-def updatePassword(id,new):
-    connection = connect(host="localhost", user="root", password="root", database="crexusers")
-
-    update = "UPDATE accounts SET password = '" + str(new) + "' WHERE id = " + str(id)
-
+def updatePassword(id, new):
+    connection = get_connection()
     with connection.cursor() as cursor:
-        cursor.execute(update)
+        cursor.execute("UPDATE accounts SET password = %s WHERE id = %s", (new, id))
         connection.commit()
 
 ## Update user email on the database ##
 
-def updateEmail(id,new):
-    connection = connect(host="localhost", user="root", password="root", database="crexusers")
-
-    update = "UPDATE accounts SET email = '" + str(new) + "' WHERE id = " + str(id)
-
+def updateEmail(id, new):
+    connection = get_connection()
     with connection.cursor() as cursor:
-        cursor.execute(update)
+        cursor.execute("UPDATE accounts SET email = %s WHERE id = %s", (new, id))
         connection.commit()
 
 ## Initial function to create database, table and insert accounts ##
@@ -130,4 +138,3 @@ def main():
 ## Run directly to check database ##
 if __name__ == "__main__":
     main()
-

@@ -1,4 +1,4 @@
-# 
+#
 # File: app.py
 # Author: Daniel Oliveira
 #
@@ -7,23 +7,29 @@
 
 ## Import dependencies ##
 
-import MySQLdb.cursors, re
+import os
+import re
+import bcrypt
+import MySQLdb.cursors
+from dotenv import load_dotenv
 from flask import *
 from flask_mysqldb import MySQL
 from chatbot import *
+
+load_dotenv()
 
 # Initialize Flask App #
 
 app = Flask(__name__)
 
-app.secret_key = 'secret'
+app.secret_key = os.environ['SECRET_KEY']
 
 # Database Connection Details #
 
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'root'
-app.config['MYSQL_DB'] = 'crexusers'
+app.config['MYSQL_HOST'] = os.environ['MYSQL_HOST']
+app.config['MYSQL_USER'] = os.environ['MYSQL_USER']
+app.config['MYSQL_PASSWORD'] = os.environ['MYSQL_PASSWORD']
+app.config['MYSQL_DB'] = os.environ['MYSQL_DB']
 
 # Intialize MySQL #
 
@@ -33,7 +39,7 @@ mysql = MySQL(app)
 
 @app.route('/crexusers/', methods=['GET', 'POST'])
 def login():
-    
+
     msg = ''
 
     # Check if user exists and matches password on database, when request by the user #
@@ -42,12 +48,12 @@ def login():
         username = request.form['username']
         password = request.form['password']
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('SELECT * FROM accounts WHERE username = %s AND password = %s', (username, password,))
+        cursor.execute('SELECT * FROM accounts WHERE username = %s', (username,))
         account = cursor.fetchone()
 
-        # If user exists and the password is correct, log in user, get his stored data, and redirect to home page #
+        # Verify bcrypt hash; reject if user not found or password doesn't match #
 
-        if account:
+        if account and bcrypt.checkpw(password.encode('utf-8'), account['password'].encode('utf-8')):
             session['loggedin'] = True
             session['id'] = account['id']
             session['username'] = account['username']
@@ -104,7 +110,8 @@ def register():
         # If all the data is correct and isn't registered on database, create new user #
 
         else:
-            cursor.execute('INSERT INTO accounts VALUES (NULL, %s, %s, %s, %s, %s)', (username, name, password, email,0,))
+            password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+            cursor.execute('INSERT INTO accounts VALUES (NULL, %s, %s, %s, %s, %s)', (username, name, password_hash, email, 0,))
             mysql.connection.commit()
             msg = 'You have successfully registered!'
 
@@ -115,7 +122,7 @@ def register():
 
     return render_template('register.html', msg=msg)
 
-## Home Page Mapping ##    
+## Home Page Mapping ##
 
 @app.route('/crexusers/home', methods=['GET', 'POST'])
 def home():
@@ -145,7 +152,7 @@ def predict():
 
     return jsonify(message)
 
-## Run file directly on http://localhost:5000/crexusers/ ##    
+## Run file directly on http://localhost:5000/crexusers/ ##
 
 if __name__ == "__main__":
     app.run(debug=True)

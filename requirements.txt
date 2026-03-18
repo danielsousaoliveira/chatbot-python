@@ -1,7 +1,9 @@
-flask 
-flask_mysqldb 
-ntlk 
-requests 
-tensorflow 
-mysql-connector-python 
+flask
+flask_mysqldb
+nltk
+requests
+tensorflow
+mysql-connector-python
 mysqlclient
+bcrypt
+python-dotenv
