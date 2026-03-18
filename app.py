@@ -5,6 +5,8 @@
 
 ### Flask app to connect user interface and the chatbot ###
 
+from __future__ import annotations
+
 ## Import dependencies ##
 
 import os
@@ -12,7 +14,7 @@ import re
 import bcrypt
 import MySQLdb.cursors
 from dotenv import load_dotenv
-from flask import *
+from flask import Flask, Response, redirect, render_template, request, session, url_for, jsonify
 from flask_mysqldb import MySQL
 from chatbot import *
 
@@ -38,7 +40,7 @@ mysql = MySQL(app)
 ## Login Request Mapping ##
 
 @app.route('/crexusers/', methods=['GET', 'POST'])
-def login():
+def login() -> str | Response:
 
     msg = ''
 
@@ -68,7 +70,7 @@ def login():
 ## Logout Request Mapping ##
 
 @app.route('/crexusers/logout')
-def logout():
+def logout() -> Response:
 
     # Remove account data, log out and redirect to login page#
 
@@ -83,7 +85,7 @@ def logout():
 ## Register Request Mapping ##
 
 @app.route('/crexusers/register', methods=['GET', 'POST'])
-def register():
+def register() -> str | Response:
 
     msg = ''
 
@@ -125,7 +127,7 @@ def register():
 ## Home Page Mapping ##
 
 @app.route('/crexusers/home', methods=['GET', 'POST'])
-def home():
+def home() -> str | Response:
 
     # Get User BTC Balance and render homepage #
 
@@ -142,7 +144,7 @@ def home():
 ## Connection between User Interface and Chatbot ##
 
 @app.post("/crexusers/predict")
-def predict():
+def predict() -> Response:
 
     # Get Chatbot answer to User Question, and return it#
 

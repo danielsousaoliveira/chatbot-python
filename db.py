@@ -5,9 +5,12 @@
 
 ### MySQL Database Initial Definition and Handling ###
 
+from __future__ import annotations
+
 ## Import dependencies ##
 
 import os
+from typing import Any
 from dotenv import load_dotenv
 from mysql.connector import connect, Error
 
@@ -15,7 +18,7 @@ load_dotenv()
 
 ## Helper to open a database connection using environment variables ##
 
-def get_connection(with_db=True):
+def get_connection(with_db: bool = True) -> Any:
     kwargs = dict(
         host=os.environ['MYSQL_HOST'],
         user=os.environ['MYSQL_USER'],
@@ -27,7 +30,7 @@ def get_connection(with_db=True):
 
 ## Create MySQL Database, if there is none with the same name ##
 
-def createDB():
+def createDB() -> None:
     try:
         with get_connection(with_db=False) as connection:
             create_db = "CREATE DATABASE IF NOT EXISTS `crexusers` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;"
@@ -38,7 +41,7 @@ def createDB():
 
 ## Create table inside the database, if there is none with the same name ##
 
-def createTable():
+def createTable() -> None:
     try:
         with get_connection() as connection:
             create_table ="""CREATE TABLE IF NOT EXISTS `accounts` (
@@ -57,7 +60,7 @@ def createTable():
 
 ## Print current database state ##
 
-def printDB():
+def printDB() -> None:
     connection = get_connection()
     show ="SELECT * FROM accounts"
     with connection.cursor() as cursor:
@@ -68,7 +71,7 @@ def printDB():
 
 ## Create initial accounts with user data and insert them into the database ##
 
-def insertInitialAccounts():
+def insertInitialAccounts() -> None:
     connection = get_connection()
     ins = """INSERT INTO `accounts` (`id`, `username`, `name`, `password`, `email`, `balance`)
           VALUES
@@ -80,7 +83,7 @@ def insertInitialAccounts():
 
 ## Remove one chosen user ##
 
-def removeUser(user):
+def removeUser(user: str) -> None:
     connection = get_connection()
     with connection.cursor() as cursor:
         cursor.execute("DELETE FROM accounts WHERE username = %s", (user,))
@@ -88,7 +91,7 @@ def removeUser(user):
 
 ## Delete existing database ##
 
-def deleteDB():
+def deleteDB() -> None:
     connection = get_connection()
     deldb = "DROP DATABASE crexusers"
     with connection.cursor() as cursor:
@@ -97,7 +100,7 @@ def deleteDB():
 
 ## Update user BTC balance, buying more or selling what he currently have ##
 
-def updateBalance(id, new, flag):
+def updateBalance(id: int, new: int, flag: bool) -> None:
     connection = get_connection()
     with connection.cursor() as cursor:
         if flag:
@@ -108,7 +111,7 @@ def updateBalance(id, new, flag):
 
 ## Update user password on the database ##
 
-def updatePassword(id, new):
+def updatePassword(id: int, new: str) -> None:
     connection = get_connection()
     with connection.cursor() as cursor:
         cursor.execute("UPDATE accounts SET password = %s WHERE id = %s", (new, id))
@@ -116,7 +119,7 @@ def updatePassword(id, new):
 
 ## Update user email on the database ##
 
-def updateEmail(id, new):
+def updateEmail(id: int, new: str) -> None:
     connection = get_connection()
     with connection.cursor() as cursor:
         cursor.execute("UPDATE accounts SET email = %s WHERE id = %s", (new, id))
@@ -124,14 +127,14 @@ def updateEmail(id, new):
 
 ## Initial function to create database, table and insert accounts ##
 
-def initializeDB():
+def initializeDB() -> None:
     createDB()
     createTable()
     insertInitialAccounts()
 
 ## Main function just to print current state of database ##
 
-def main():
+def main() -> None:
     #initializeDB() #run in the first initialization
     printDB()
 

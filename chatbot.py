@@ -5,9 +5,13 @@
 
 ### Conversation Agent Backend Functions ###
 
+from __future__ import annotations
+
 ## Import dependencies ##
 
-import pickle, json
+import pickle
+import json
+from typing import Any
 from utils import *
 from tensorflow import keras
 
@@ -17,7 +21,7 @@ inputarray = ["first"]
 
 ## Import Natural Language Toolkit including WordNet, and NN Model ##
 
-def importModel():
+def importModel() -> tuple[dict, list, list, Any]:
 
     with open('intents.json', 'r') as jsondata:
         intents = json.load(jsondata)
@@ -32,7 +36,7 @@ def importModel():
 # id - User ID
 # name - User Name
 
-def communicate(inputmsg, id, name):
+def communicate(inputmsg: str, id: int, name: str) -> str:
 
     intents, words, classes, model = importModel()
     prediction, flag = predictclass(inputmsg, model, words, classes)

@@ -5,14 +5,17 @@
 
 ### Neural Network Build ###
 
+from __future__ import annotations
+
 ## Import dependencies ##
 
+from typing import Any
 from tensorflow import keras
 import numpy as np
 
 ## Build Deep Neural Network to train our chatbot ##
 
-def NeuralNetwork(input, output):
+def NeuralNetwork(input: list, output: list) -> Any:
     
     model = keras.models.Sequential()
     model.add(keras.layers.Dense(128,input_shape=(len(input[0]),),activation='relu'))

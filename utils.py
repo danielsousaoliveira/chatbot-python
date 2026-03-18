@@ -5,9 +5,14 @@
 
 ### All the utility functions used on the other files ###
 
+from __future__ import annotations
+
 ## Import dependencies ##
 
-import nltk, random, time
+import nltk
+import random
+import time
+from typing import Any
 import numpy as np
 from db import *
 from nltk.stem import *
@@ -19,7 +24,7 @@ lem = WordNetLemmatizer()
 
 # Use Natural Language Toolkit to divide Intents file into Lemmatized words, its classes and tokens #
 
-def prepareintents(intents):
+def prepareintents(intents: dict) -> tuple[list, list, list]:
 
     words = []; classes = []; tokens = []
 
@@ -37,7 +42,7 @@ def prepareintents(intents):
 
 # Lemmatize Words to make it easier (i.e. universities == university) #
 
-def stemintents(words,classes):
+def stemintents(words: list, classes: list) -> tuple[list, list]:
 
     charign = ['!','?','.',',']
     words = [lem.lemmatize(word) for word in words if word not in charign]
@@ -48,7 +53,7 @@ def stemintents(words,classes):
 
 # Transform words into value data, preparing it for the NN #
 
-def preparenn(words,classes,tokens):
+def preparenn(words: list, classes: list, tokens: list) -> tuple[list, list]:
 
     training = []
     output = [0]*len(classes)
@@ -72,7 +77,7 @@ def preparenn(words,classes,tokens):
 
 # Predict the class of one given question, using trained data #
 
-def predictclass(inputmsg, model, words, classes):
+def predictclass(inputmsg: str, model: Any, words: list, classes: list) -> tuple[list, bool]:
 
     wn.ensure_loaded()
     returnlist = []
@@ -91,7 +96,7 @@ def predictclass(inputmsg, model, words, classes):
 
 # Prepare the question for prediction function #
 
-def preparesentence(inputmsg, words):
+def preparesentence(inputmsg: str, words: list) -> tuple[Any, bool]:
 
     sentence = nltk.word_tokenize(inputmsg)
     sentence = [lem.lemmatize(word) for word in sentence]
@@ -111,7 +116,7 @@ def preparesentence(inputmsg, words):
 
 # Using predicted class, choose one random answer from the pre-defined ones, and then make needed changes #
 
-def findanswer(prediction, intents, inputmsg, inputarray, flag, id, name):
+def findanswer(prediction: list, intents: dict, inputmsg: str, inputarray: list, flag: bool, id: int, name: str) -> str:
 
     tag = prediction[0]['intent']
     intentlist = intents['intents']
