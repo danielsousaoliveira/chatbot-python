@@ -1,150 +1,63 @@
-# 
+#
 # File: utils.py
 # Author: Daniel Oliveira
 #
 
-### All the utility functions used on the other files ###
+### Utility functions: semantic intent matching and response generation ###
 
 from __future__ import annotations
 
-## Import dependencies ##
-
-import nltk
+import json
 import random
 import time
 from typing import Any
-import numpy as np
+
+from sentence_transformers import SentenceTransformer
+from sentence_transformers import util as st_util
 from db import *
-from nltk.stem import *
-from nltk.corpus import wordnet as wn
 
-# Import WordNet Lemmatizer #
+# Load the sentence-transformer model once at import time
+_model = SentenceTransformer('all-MiniLM-L6-v2')
 
-lem = WordNetLemmatizer()
 
-# Use Natural Language Toolkit to divide Intents file into Lemmatized words, its classes and tokens #
+def load_intents(path: str = 'intents.json') -> dict:
+    """Load intents from JSON file."""
+    with open(path) as f:
+        return json.load(f)
 
-def prepareintents(intents: dict) -> tuple[list, list, list]:
 
-    words = []; classes = []; tokens = []
-
+def build_intent_embeddings(intents: dict) -> tuple[list, list]:
+    """Pre-compute the mean embedding for each intent's patterns."""
+    tags: list[str] = []
+    embeddings: list[Any] = []
     for intent in intents['intents']:
-        for pattern in intent['patterns']:
-            wordlist = nltk.word_tokenize(pattern)
-            words.extend(wordlist)
-            tokens.append((wordlist, intent['tag']))
-            if intent['tag'] not in classes:
-                classes.append(intent['tag'])
+        embs = _model.encode(intent['patterns'], convert_to_tensor=True)
+        tags.append(intent['tag'])
+        embeddings.append(embs.mean(dim=0))
+    return tags, embeddings
 
-    words, classes = stemintents(words,classes)
 
-    return words, classes, tokens
+def predict_intent(user_input: str, tags: list, embeddings: list, threshold: float = 0.35) -> str | None:
+    """Return the intent tag with the highest cosine similarity, or None if below threshold."""
+    user_emb = _model.encode(user_input, convert_to_tensor=True)
+    scores = [st_util.cos_sim(user_emb, emb).item() for emb in embeddings]
+    best_idx = max(range(len(scores)), key=lambda i: scores[i])
+    return tags[best_idx] if scores[best_idx] >= threshold else None
 
-# Lemmatize Words to make it easier (i.e. universities == university) #
 
-def stemintents(words: list, classes: list) -> tuple[list, list]:
-
-    charign = ['!','?','.',',']
-    words = [lem.lemmatize(word) for word in words if word not in charign]
-    words = sorted(set(words))
-    classes = sorted(set(classes))
-
-    return words, classes
-
-# Transform words into value data, preparing it for the NN #
-
-def preparenn(words: list, classes: list, tokens: list) -> tuple[list, list]:
-
-    training = []
-    output = [0]*len(classes)
-
-    for token in tokens:
-        queue = []
-        pattern = token[0]
-        pattern = [lem.lemmatize(word.lower()) for word in pattern]
-        for word in words:
-            queue.append(1 if word in pattern else 0)
-        outputs = list(output)
-        outputs[classes.index(token[1])] = 1
-        training.append([queue, outputs])
-
-    random.shuffle(training)
-    training = np.array(training, dtype=object)
-    xtrain = list(training[:,0])
-    ytrain = list(training[:,1])
-
-    return xtrain, ytrain
-
-# Predict the class of one given question, using trained data #
-
-def predictclass(inputmsg: str, model: Any, words: list, classes: list) -> tuple[list, bool]:
-
-    wn.ensure_loaded()
-    returnlist = []
-
-    sentence, flag = preparesentence(inputmsg, words)
-    result = model.predict(np.array([sentence]))[0]
-    results = [[i,r] for i,r in enumerate(result) if r > 0.2]
-    results.sort(key=lambda x: x[1], reverse=True)
- 
-    for r in results:
-        returnlist.append({'intent': classes[r[0]], 'probability': str(r[1])})
-        if float(r[1]) < 0.28:
-            flag = True
-
-    return returnlist, flag
-
-# Prepare the question for prediction function #
-
-def preparesentence(inputmsg: str, words: list) -> tuple[Any, bool]:
-
-    sentence = nltk.word_tokenize(inputmsg)
-    sentence = [lem.lemmatize(word) for word in sentence]
-    flag = True
-    output = [0]*len(words)
-
-    for t in sentence:
-            if wn.synsets(t):
-                flag = False
-
-    for w in sentence:
-        for i, word in enumerate(words):
-            if word == w:
-                output[i] = 1
-
-    return np.array(output), flag
-
-# Using predicted class, choose one random answer from the pre-defined ones, and then make needed changes #
-
-def findanswer(prediction: list, intents: dict, inputmsg: str, inputarray: list, flag: bool, id: int, name: str) -> str:
-
-    tag = prediction[0]['intent']
+def findanswer(tag: str, intents: dict, inputmsg: str, inputarray: list, id: int, name: str) -> str:
+    """Select and personalise a response for the matched intent."""
     intentlist = intents['intents']
     result = ""
-    flag2 = True
-
-    # Check if there is a second input related to a user order #
-
-    if inputarray[-1] == "Buy" or inputarray[-1] == "Sell" or inputarray[-1] == "Password" or inputarray[-1] == "Email":
-        flag2 = False
+    # flag2: True when this is a first-time action request (not a follow-up)
+    flag2 = inputarray[-1] not in ("Buy", "Sell", "Password", "Email")
 
     for i in intentlist:
-
         if i['tag'] == tag:
-
             result = random.choice(i['answers'])
 
-            # No answer found for the question #
-
-            if flag and flag2: 
-                result = "Not sure if i understood that can you put it in another words?"
-
-            # User requests current time #
-
-            elif i['tag'] == "Time" and flag2:
+            if i['tag'] == "Time" and flag2:
                 result = result.replace("%%TIME%%", time.strftime("%c"))
-
-            # User requests buy order #    
 
             elif i['tag'] == "Buy" and flag2:
                 try:
@@ -155,8 +68,6 @@ def findanswer(prediction: list, intents: dict, inputmsg: str, inputarray: list,
                     updateBalance(id, value, True)
                     result = "Done! Please reload page to see your balance"
 
-            # User requests sell order #
-
             elif i['tag'] == "Sell" and flag2:
                 try:
                     value = int(''.join(filter(str.isdigit, inputmsg)))
@@ -166,17 +77,11 @@ def findanswer(prediction: list, intents: dict, inputmsg: str, inputarray: list,
                     updateBalance(id, value, False)
                     result = "Done! Please reload page to see your balance"
 
-            # Initial greetings using real user name #
-
             elif i['tag'] == "Greeting" and flag2:
                 result = result.replace("%%Name%%", name.split()[0])
 
-            # User requests his name #   
-
             elif i['tag'] == "Name" and flag2:
                 result = result.replace("%%Name%%", name)
-
-            # Handling second inputs from user orders #
 
             else:
                 if inputarray[-1] == "Buy":
@@ -198,12 +103,11 @@ def findanswer(prediction: list, intents: dict, inputmsg: str, inputarray: list,
                         result = "Done! Please reload page to see your balance"
 
                 elif inputarray[-1] == "Password":
-                    print(inputmsg)
-                    updatePassword(id,inputmsg)
+                    updatePassword(id, inputmsg)
                     result = "Done! Your password is updated"
+
                 elif inputarray[-1] == "Email":
-                    updateEmail(id,inputmsg)
-                    result = "Done! Your email is updated"  
+                    updateEmail(id, inputmsg)
+                    result = "Done! Your email is updated"
 
     return result
-

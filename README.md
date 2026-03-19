@@ -18,20 +18,18 @@ MySQL database  (db.py)
 
 ### ML Pipeline
 
-The chatbot uses an **intent classification** approach:
+The chatbot uses **semantic intent classification** via sentence-transformers:
 
-**Training** (run once with `python train.py`):
+**Pre-computation** (run once with `python train.py`):
 1. Load intent patterns from `intents.json`
-2. Tokenise and lemmatise patterns with NLTK
-3. Encode as binary bag-of-words vectors
-4. Train a 3-layer dense neural network (128 → 64 → *n_intents*, softmax)
-5. Save artefacts: `chatmodel.h5`, `words.plk`, `classes.plk`
+2. Encode all patterns with `all-MiniLM-L6-v2` (384-dim embeddings)
+3. Compute mean embedding per intent; save to `intent_embeddings.pkl`
 
 **Inference** (every user message):
-1. Load saved model and vocabulary
-2. Convert user input to bag-of-words vector
-3. Run forward pass; filter predictions below 0.2 confidence
-4. Look up matching intent in `intents.json`; pick a random answer
+1. Load cached embeddings at startup (once, not per request)
+2. Encode user input with the same model
+3. Compute cosine similarity against all intent embeddings
+4. Return best match if score ≥ 0.35, else ask for clarification
 5. Apply template substitutions (`%%Name%%`, `%%TIME%%`) and handle special intents (Buy/Sell update the user's BTC balance in MySQL)
 
 ### Tech Stack
@@ -39,8 +37,7 @@ The chatbot uses an **intent classification** approach:
 | Layer | Technology |
 |---|---|
 | Backend | Python, Flask, Flask-MySQLdb |
-| NLP | NLTK (tokenisation, lemmatisation) |
-| ML | TensorFlow / Keras (Sequential NN) |
+| NLP/ML | sentence-transformers (`all-MiniLM-L6-v2`) |
 | Database | MySQL |
 | Frontend | Vanilla JS, HTML/CSS |
 
@@ -67,18 +64,11 @@ $ . venv/bin/activate
 
 ```bash
 $ (venv) pip install -r requirements.txt
-$ (venv) python3
-
-> > > import nltk
-> > > nltk.download('punkt')
-> > > nltk.download('punkt_tab')
-> > > nltk.download('wordnet')
-
 ```
 
 ## Run
 
-1. Train the chatbot
+1. Pre-compute intent embeddings
 
 ```bash
 $ (venv) python3 train.py
