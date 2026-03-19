@@ -1,4 +1,4 @@
-# 
+#
 # File: chatbot.py
 # Author: Daniel Oliveira
 #
@@ -7,42 +7,29 @@
 
 from __future__ import annotations
 
-## Import dependencies ##
-
 import pickle
-import json
-from typing import Any
-from utils import *
-from tensorflow import keras
+from pathlib import Path
+from utils import load_intents, build_intent_embeddings, predict_intent, findanswer
 
-# Create array to save user question tags #
+EMBEDDINGS_CACHE = 'intent_embeddings.pkl'
 
-inputarray = ["first"]
+# Track the last intent tag for multi-turn conversation handling
+inputarray: list[str] = ["first"]
 
-## Import Natural Language Toolkit including WordNet, and NN Model ##
+# Load intents and embeddings once at startup
+intents = load_intents()
+if Path(EMBEDDINGS_CACHE).exists():
+    with open(EMBEDDINGS_CACHE, 'rb') as f:
+        tags, embeddings = pickle.load(f)
+else:
+    tags, embeddings = build_intent_embeddings(intents)
 
-def importModel() -> tuple[dict, list, list, Any]:
-
-    with open('intents.json', 'r') as jsondata:
-        intents = json.load(jsondata)
-    words = pickle.load(open('words.plk','rb'))
-    classes = pickle.load(open('classes.plk','rb'))
-    model = keras.models.load_model('chatmodel.h5')
-
-    return intents, words, classes, model                     
-
-## Function to communicate with the chatbot ##
-# inputmsg - Question from user
-# id - User ID
-# name - User Name
 
 def communicate(inputmsg: str, id: int, name: str) -> str:
-
-    intents, words, classes, model = importModel()
-    prediction, flag = predictclass(inputmsg, model, words, classes)
-    result = findanswer(prediction, intents, inputmsg, inputarray, flag, id, name)
-    inputarray.append(prediction[0]['intent'])
-
+    """Return the chatbot's response to a user message."""
+    tag = predict_intent(inputmsg, tags, embeddings)
+    if tag is None:
+        return "Not sure I understood that, can you put it another way?"
+    result = findanswer(tag, intents, inputmsg, inputarray, id, name)
+    inputarray.append(tag)
     return result
-    
-# Returns chatbot's answer for any user question #

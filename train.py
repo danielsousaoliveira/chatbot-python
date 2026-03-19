@@ -1,32 +1,22 @@
-# 
+#
 # File: train.py
 # Author: Daniel Oliveira
 #
 
-### Train data for the Conversational Agent ###
+"""Pre-compute sentence-transformer embeddings for all intent patterns."""
 
-## Import dependencies ##
+from __future__ import annotations
 
-import json, pickle
-from model import *
-from utils import *
+import pickle
+from utils import load_intents, build_intent_embeddings
 
-# Import Intents Dictionary #
-                           
-with open('intents.json', 'r') as jsondata:
-    intents = json.load(jsondata)
+EMBEDDINGS_CACHE = 'intent_embeddings.pkl'
 
-# Stem Intents #
-
-words, classes, patterns = prepareintents(intents)
-pickle.dump(words, open('words.plk','wb'))
-pickle.dump(classes, open('classes.plk','wb'))
-
-# Prepare Data for Neural Network #
-
-inputrain, outputrain = preparenn(words,classes,patterns)
-
-# Train Neural Network #
-
-model = NeuralNetwork(inputrain,outputrain)
-
+if __name__ == '__main__':
+    print("Loading intents...")
+    intents = load_intents()
+    print(f"Computing embeddings for {len(intents['intents'])} intents...")
+    tags, embeddings = build_intent_embeddings(intents)
+    with open(EMBEDDINGS_CACHE, 'wb') as f:
+        pickle.dump((tags, embeddings), f)
+    print(f"Saved {len(tags)} intent embeddings to {EMBEDDINGS_CACHE}")
