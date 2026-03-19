@@ -73,7 +73,7 @@ def printDB() -> None:
 
 def insertInitialAccounts() -> None:
     connection = get_connection()
-    ins = """INSERT INTO `accounts` (`id`, `username`, `name`, `password`, `email`, `balance`)
+    ins = """INSERT IGNORE INTO `accounts` (`id`, `username`, `name`, `password`, `email`, `balance`)
           VALUES
           (1, 'daniel', 'Daniel Oliveira', 'pass1', 'danielsoliveira@ua.pt', 0)
           """

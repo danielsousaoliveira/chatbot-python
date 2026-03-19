@@ -91,6 +91,17 @@ Password: pass1
 
 5. Test the chatbot
 
+## Docker
+
+```bash
+cp .env.example .env
+# Edit .env: set SECRET_KEY and MYSQL_PASSWORD
+
+docker-compose up --build
+```
+
+App available at http://localhost:5000/crexusers/
+
 ## Example
 
 ![Example](static/images/img1.png)
