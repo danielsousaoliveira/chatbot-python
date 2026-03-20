@@ -125,6 +125,31 @@ def updateEmail(id: int, new: str) -> None:
         cursor.execute("UPDATE accounts SET email = %s WHERE id = %s", (new, id))
         connection.commit()
 
+## Get a user account by username ##
+
+def get_user(username: str) -> dict | None:
+    connection = get_connection()
+    with connection.cursor(dictionary=True) as cursor:
+        cursor.execute('SELECT * FROM accounts WHERE username = %s', (username,))
+        return cursor.fetchone()
+
+## Create a new user account ##
+
+def create_user(username: str, name: str, password_hash: str, email: str) -> None:
+    connection = get_connection()
+    with connection.cursor() as cursor:
+        cursor.execute('INSERT INTO accounts VALUES (NULL, %s, %s, %s, %s, %s)', (username, name, password_hash, email, 0))
+        connection.commit()
+
+## Get a user's BTC balance by user ID ##
+
+def get_balance(user_id: int) -> int:
+    connection = get_connection()
+    with connection.cursor() as cursor:
+        cursor.execute('SELECT balance FROM accounts WHERE id = %s', (user_id,))
+        row = cursor.fetchone()
+        return int(row[0]) if row else 0
+
 ## Initial function to create database, table and insert accounts ##
 
 def initializeDB() -> None:

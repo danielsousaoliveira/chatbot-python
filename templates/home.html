@@ -15,7 +15,7 @@
 	<head>
 		<meta charset="utf-8">
 		<title>{% block title %}Home{% endblock %}</title>
-		<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+		<link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
 		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
 	</head>
 	<body class="loggedin">
@@ -39,7 +39,7 @@
 					<div class="chatbox__header">
 						<div class="chatbox__circle">
 							<div class="chatbox__image--header">
-								<img src="{{ url_for('static', filename='images/icon.png') }}" alt="image">
+								<img src="{{ url_for('static', path='images/icon.png') }}" alt="image">
 							</div>
 						</div>
 						<div class="chatbox__content--header">
@@ -56,14 +56,14 @@
 					</div>
 				</div>
 				<div class="chatbox__button">
-					<button><img src="{{ url_for('static', filename='images/icon.png') }}" /></button>
+					<button><img src="{{ url_for('static', path='images/icon.png') }}" /></button>
 				</div>
 			</div>
 		</div>
 		
 			<script type=text/javascript>
-				$SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+				$SCRIPT_ROOT = {{ script_root|tojson|safe }};
 			</script>
-			<script type="text/javascript" src="{{ url_for('static', filename='app.js') }}"></script>
+			<script type="text/javascript" src="{{ url_for('static', path='app.js') }}"></script>
 	</body>
 </html>

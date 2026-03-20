@@ -1,8 +1,10 @@
-flask
-flask_mysqldb
+fastapi
+uvicorn[standard]
+pydantic>=2.0
+python-jose[cryptography]
+python-multipart
 requests
 mysql-connector-python
-mysqlclient
 bcrypt
 python-dotenv
 sentence-transformers
