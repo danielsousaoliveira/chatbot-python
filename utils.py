@@ -31,6 +31,8 @@ def build_intent_embeddings(intents: dict) -> tuple[list, list]:
     tags: list[str] = []
     embeddings: list[Any] = []
     for intent in intents['intents']:
+        if not intent['patterns']:
+            continue
         embs = _model.encode(intent['patterns'], convert_to_tensor=True)
         tags.append(intent['tag'])
         embeddings.append(embs.mean(dim=0))
@@ -40,7 +42,7 @@ def build_intent_embeddings(intents: dict) -> tuple[list, list]:
 def predict_intent(user_input: str, tags: list, embeddings: list, threshold: float = 0.35) -> str | None:
     """Return the intent tag with the highest cosine similarity, or None if below threshold."""
     user_emb = _model.encode(user_input, convert_to_tensor=True)
-    scores = [st_util.cos_sim(user_emb, emb).item() for emb in embeddings]
+    scores = [st_util.cos_sim(user_emb.unsqueeze(0), emb.unsqueeze(0)).item() for emb in embeddings]
     best_idx = max(range(len(scores)), key=lambda i: scores[i])
     return tags[best_idx] if scores[best_idx] >= threshold else None
 
