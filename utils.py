@@ -7,23 +7,21 @@
 
 from __future__ import annotations
 
-import json
 import random
 import time
 from typing import Any
 
 from sentence_transformers import SentenceTransformer
 from sentence_transformers import util as st_util
-from db import *
+from db import load_intents_from_db, updateBalance, updateEmail, updatePassword
 
 # Load the sentence-transformer model once at import time
 _model = SentenceTransformer('all-MiniLM-L6-v2')
 
 
-def load_intents(path: str = 'intents.json') -> dict:
-    """Load intents from JSON file."""
-    with open(path) as f:
-        return json.load(f)
+def load_intents() -> dict:
+    """Load intents from the database."""
+    return load_intents_from_db()
 
 
 def build_intent_embeddings(intents: dict) -> tuple[list, list]:
