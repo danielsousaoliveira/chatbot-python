@@ -4,7 +4,8 @@ pydantic>=2.0
 python-jose[cryptography]
 python-multipart
 requests
-mysql-connector-python
+sqlalchemy
+alembic
 bcrypt
 python-dotenv
 sentence-transformers

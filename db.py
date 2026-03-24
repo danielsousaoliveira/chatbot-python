@@ -3,166 +3,172 @@
 # Author: Daniel Oliveira
 #
 
-### MySQL Database Initial Definition and Handling ###
+### SQLAlchemy ORM Database Layer ###
 
 from __future__ import annotations
 
-## Import dependencies ##
-
+import json
 import os
-from typing import Any
+
+import bcrypt
+from alembic import command
+from alembic.config import Config
 from dotenv import load_dotenv
-from mysql.connector import connect, Error
+from sqlalchemy import Column, ForeignKey, Integer, String, create_engine
+from sqlalchemy.orm import declarative_base, sessionmaker
 
 load_dotenv()
 
-## Helper to open a database connection using environment variables ##
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./crexusers.db")
 
-def get_connection(with_db: bool = True) -> Any:
-    kwargs = dict(
-        host=os.environ['MYSQL_HOST'],
-        user=os.environ['MYSQL_USER'],
-        password=os.environ['MYSQL_PASSWORD'],
-    )
-    if with_db:
-        kwargs['database'] = os.environ['MYSQL_DB']
-    return connect(**kwargs)
+engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+SessionLocal = sessionmaker(bind=engine)
+Base = declarative_base()
 
-## Create MySQL Database, if there is none with the same name ##
 
-def createDB() -> None:
-    try:
-        with get_connection(with_db=False) as connection:
-            create_db = "CREATE DATABASE IF NOT EXISTS `crexusers` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;"
-            with connection.cursor() as cursor:
-                cursor.execute(create_db)
-    except Error as e:
-        print(e)
+class User(Base):
+    __tablename__ = "accounts"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    username = Column(String(50), nullable=False, unique=True)
+    name = Column(String(100), nullable=False)
+    password = Column(String(255), nullable=False)
+    email = Column(String(100), nullable=False)
+    balance = Column(Integer, nullable=False, default=0)
 
-## Create table inside the database, if there is none with the same name ##
 
-def createTable() -> None:
-    try:
-        with get_connection() as connection:
-            create_table ="""CREATE TABLE IF NOT EXISTS `accounts` (
-	                      `id` int(11) NOT NULL AUTO_INCREMENT,
-  	                      `username` varchar(50) NOT NULL,
-                          `name` varchar(100) NOT NULL,
-  	                      `password` varchar(255) NOT NULL,
-  	                      `email` varchar(100) NOT NULL,
-                          `balance` int(255) NOT NULL,
-                          PRIMARY KEY (`id`)) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;"""
-            with connection.cursor() as cursor:
-                cursor.execute(create_table)
-                connection.commit()
-    except Error as e:
-        print(e)
+class Intent(Base):
+    __tablename__ = "intents"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    tag = Column(String(100), nullable=False, unique=True)
 
-## Print current database state ##
 
-def printDB() -> None:
-    connection = get_connection()
-    show ="SELECT * FROM accounts"
-    with connection.cursor() as cursor:
-        cursor.execute(show)
-        result = cursor.fetchall()
-    for row in result:
-        print(row)
+class Pattern(Base):
+    __tablename__ = "patterns"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    intent_id = Column(Integer, ForeignKey("intents.id"), nullable=False)
+    text = Column(String(500), nullable=False)
 
-## Create initial accounts with user data and insert them into the database ##
 
-def insertInitialAccounts() -> None:
-    connection = get_connection()
-    ins = """INSERT IGNORE INTO `accounts` (`id`, `username`, `name`, `password`, `email`, `balance`)
-          VALUES
-          (1, 'daniel', 'Daniel Oliveira', 'pass1', 'danielsoliveira@ua.pt', 0)
-          """
-    with connection.cursor() as cursor:
-        cursor.execute(ins)
-        connection.commit()
+class Answer(Base):
+    __tablename__ = "answers"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    intent_id = Column(Integer, ForeignKey("intents.id"), nullable=False)
+    text = Column(String(1000), nullable=False)
 
-## Remove one chosen user ##
 
 def removeUser(user: str) -> None:
-    connection = get_connection()
-    with connection.cursor() as cursor:
-        cursor.execute("DELETE FROM accounts WHERE username = %s", (user,))
-        connection.commit()
+    with SessionLocal() as session:
+        u = session.query(User).filter_by(username=user).first()
+        if u:
+            session.delete(u)
+            session.commit()
 
-## Delete existing database ##
-
-def deleteDB() -> None:
-    connection = get_connection()
-    deldb = "DROP DATABASE crexusers"
-    with connection.cursor() as cursor:
-        cursor.execute(deldb)
-        connection.commit()
-
-## Update user BTC balance, buying more or selling what he currently have ##
 
 def updateBalance(id: int, new: int, flag: bool) -> None:
-    connection = get_connection()
-    with connection.cursor() as cursor:
-        if flag:
-            cursor.execute("UPDATE accounts SET balance = balance + %s WHERE id = %s", (new, id))
-        else:
-            cursor.execute("UPDATE accounts SET balance = GREATEST(0, balance - %s) WHERE id = %s", (new, id))
-        connection.commit()
+    with SessionLocal() as session:
+        u = session.query(User).filter_by(id=id).first()
+        if u:
+            if flag:
+                u.balance += new
+            else:
+                u.balance = max(0, u.balance - new)
+            session.commit()
 
-## Update user password on the database ##
 
 def updatePassword(id: int, new: str) -> None:
-    connection = get_connection()
-    with connection.cursor() as cursor:
-        cursor.execute("UPDATE accounts SET password = %s WHERE id = %s", (new, id))
-        connection.commit()
+    with SessionLocal() as session:
+        u = session.query(User).filter_by(id=id).first()
+        if u:
+            u.password = new
+            session.commit()
 
-## Update user email on the database ##
 
 def updateEmail(id: int, new: str) -> None:
-    connection = get_connection()
-    with connection.cursor() as cursor:
-        cursor.execute("UPDATE accounts SET email = %s WHERE id = %s", (new, id))
-        connection.commit()
+    with SessionLocal() as session:
+        u = session.query(User).filter_by(id=id).first()
+        if u:
+            u.email = new
+            session.commit()
 
-## Get a user account by username ##
 
 def get_user(username: str) -> dict | None:
-    connection = get_connection()
-    with connection.cursor(dictionary=True) as cursor:
-        cursor.execute('SELECT * FROM accounts WHERE username = %s', (username,))
-        return cursor.fetchone()
+    with SessionLocal() as session:
+        u = session.query(User).filter_by(username=username).first()
+        if u is None:
+            return None
+        return {
+            "id": u.id,
+            "username": u.username,
+            "name": u.name,
+            "password": u.password,
+            "email": u.email,
+            "balance": u.balance,
+        }
 
-## Create a new user account ##
 
 def create_user(username: str, name: str, password_hash: str, email: str) -> None:
-    connection = get_connection()
-    with connection.cursor() as cursor:
-        cursor.execute('INSERT INTO accounts VALUES (NULL, %s, %s, %s, %s, %s)', (username, name, password_hash, email, 0))
-        connection.commit()
+    with SessionLocal() as session:
+        user = User(username=username, name=name, password=password_hash, email=email, balance=0)
+        session.add(user)
+        session.commit()
 
-## Get a user's BTC balance by user ID ##
 
 def get_balance(user_id: int) -> int:
-    connection = get_connection()
-    with connection.cursor() as cursor:
-        cursor.execute('SELECT balance FROM accounts WHERE id = %s', (user_id,))
-        row = cursor.fetchone()
-        return int(row[0]) if row else 0
+    with SessionLocal() as session:
+        u = session.query(User).filter_by(id=user_id).first()
+        return u.balance if u else 0
 
-## Initial function to create database, table and insert accounts ##
+
+def load_intents_from_db() -> dict:
+    """Return intents in the same structure as intents.json."""
+    with SessionLocal() as session:
+        result = []
+        for intent in session.query(Intent).all():
+            patterns = [p.text for p in session.query(Pattern).filter_by(intent_id=intent.id).all()]
+            answers = [a.text for a in session.query(Answer).filter_by(intent_id=intent.id).all()]
+            result.append({"tag": intent.tag, "patterns": patterns, "answers": answers})
+    return {"intents": result}
+
 
 def initializeDB() -> None:
-    createDB()
-    createTable()
-    insertInitialAccounts()
+    alembic_cfg = Config("alembic.ini")
+    command.upgrade(alembic_cfg, "head")
+    with SessionLocal() as session:
+        if not session.query(User).filter_by(username="daniel").first():
+            password_hash = bcrypt.hashpw(b"pass1", bcrypt.gensalt()).decode("utf-8")
+            session.add(User(
+                username="daniel",
+                name="Daniel Oliveira",
+                password=password_hash,
+                email="danielsoliveira@ua.pt",
+                balance=0,
+            ))
+            session.commit()
 
-## Main function just to print current state of database ##
-
-def main() -> None:
-    #initializeDB() #run in the first initialization
-    printDB()
+        if session.query(Intent).count() == 0:
+            with open("intents.json") as f:
+                data = json.load(f)
+            seen_tags: set[str] = set()
+            for item in data["intents"]:
+                if item["tag"] in seen_tags:
+                    continue
+                seen_tags.add(item["tag"])
+                intent = Intent(tag=item["tag"])
+                session.add(intent)
+                session.flush()
+                for p in item["patterns"]:
+                    session.add(Pattern(intent_id=intent.id, text=p))
+                for a in item["answers"]:
+                    session.add(Answer(intent_id=intent.id, text=a))
+            session.commit()
 
 ## Run directly to check database ##
+
+def main() -> None:
+    with SessionLocal() as session:
+        for u in session.query(User).all():
+            print(u.id, u.username, u.name, u.balance)
+
+
 if __name__ == "__main__":
     main()
