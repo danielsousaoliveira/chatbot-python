@@ -7,5 +7,12 @@ services:
     volumes:
       - sqlite_data:/app/data
 
+  client:
+    build: ./client
+    ports:
+      - "3000:3000"
+    depends_on:
+      - app
+
 volumes:
   sqlite_data:
