@@ -31,7 +31,14 @@ ACCESS_TOKEN_EXPIRE_MINUTES = int(os.environ.get('ACCESS_TOKEN_EXPIRE_MINUTES', 
 
 # Initialize FastAPI app #
 
-app = FastAPI()
+app = FastAPI(
+    title="Crex Chatbot API",
+    description=(
+        "REST API for the Cryptocurrency Exchange chatbot. "
+        "Handles user authentication via httponly JWT cookies and NLP-powered chat predictions."
+    ),
+    version="1.0.0",
+)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=['http://localhost:3000'],
@@ -78,6 +85,7 @@ def get_current_user_api(request: Request) -> UserContext:
 
 @app.post('/crexusers/', name='login')
 def login(body: LoginRequest):
+    """Authenticate a user and set a JWT cookie. Returns the user profile on success."""
     account = get_user(body.username)
     if not account or not bcrypt.checkpw(body.password.encode('utf-8'), account['password'].encode('utf-8')):
         raise HTTPException(status_code=401, detail='Incorrect username/password!')
@@ -100,6 +108,7 @@ def login(body: LoginRequest):
 
 @app.post('/crexusers/logout', name='logout')
 def logout():
+    """Clear the JWT cookie and end the session."""
     response = JSONResponse(content={'message': 'Logged out'})
     response.delete_cookie('access_token')
     return response
@@ -109,6 +118,7 @@ def logout():
 
 @app.post('/crexusers/register', name='register')
 def register(body: RegisterRequest):
+    """Register a new user account. Returns 201 on success."""
     if get_user(body.username):
         raise HTTPException(status_code=400, detail='Account already exists!')
     if not re.match(r'[^@]+@[^@]+\.[^@]+', body.email):
@@ -124,6 +134,7 @@ def register(body: RegisterRequest):
 
 @app.get('/crexusers/home', name='home')
 def home(current_user: Annotated[UserContext, Depends(get_current_user_api)]):
+    """Return the authenticated user's profile and current BTC balance."""
     balance = get_balance(current_user.id)
     return JSONResponse(content={
         'name': current_user.name,
@@ -139,5 +150,6 @@ def predict(
     body: PredictRequest,
     current_user: Annotated[UserContext, Depends(get_current_user_api)],
 ):
+    """Send a chat message and receive an NLP-generated bot response."""
     answer = communicate(body.message, id=current_user.id, name=current_user.name)
     return PredictResponse(answer=answer)
