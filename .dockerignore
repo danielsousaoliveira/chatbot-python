@@ -1,8 +1,11 @@
 .env
 venv/
+client/
 __pycache__/
 *.pyc
-*.plk
+*.pkl
 intent_embeddings.pkl
 *.h5
 .git/
+crexusers.db
+.cache/

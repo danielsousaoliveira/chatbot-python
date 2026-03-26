@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from '@/context/AuthContext'
 import { useAuth } from '@/hooks/useAuth'
@@ -5,13 +6,13 @@ import LoginPage from '@/pages/LoginPage'
 import RegisterPage from '@/pages/RegisterPage'
 import HomePage from '@/pages/HomePage'
 
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
+function ProtectedRoute({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth()
   if (loading) return null
   return user ? <>{children}</> : <Navigate to="/login" replace />
 }
 
-function GuestRoute({ children }: { children: React.ReactNode }) {
+function GuestRoute({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth()
   if (loading) return null
   return !user ? <>{children}</> : <Navigate to="/" replace />

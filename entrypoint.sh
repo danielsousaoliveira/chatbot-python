@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+mkdir -p /app/data
+
 echo "Initializing database..."
 python -c "from db import initializeDB; initializeDB()"
 
