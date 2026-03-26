@@ -18,6 +18,18 @@ class UserContext(BaseModel):
     balance: int
 
 
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+
+class RegisterRequest(BaseModel):
+    username: str
+    name: str
+    password: str
+    email: str
+
+
 class PredictRequest(BaseModel):
     message: str
 
