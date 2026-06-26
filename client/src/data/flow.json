@@ -1,0 +1,137 @@
+{
+  "start": "welcome",
+  "nodes": {
+    "welcome": {
+      "message": "Hi %%NAME%%! What can I help you with?",
+      "options": [
+        { "label": "Trade BTC", "next": "trade" },
+        { "label": "Account Settings", "next": "account" },
+        { "label": "Learn about Crypto", "next": "learn" },
+        { "label": "Ask a question", "next": "freetext" }
+      ]
+    },
+
+    "trade": {
+      "message": "What would you like to do?",
+      "options": [
+        { "label": "Buy BTC", "next": "buy_input" },
+        { "label": "Sell BTC", "next": "sell_input" },
+        { "label": "← Back", "next": "welcome" }
+      ]
+    },
+    "buy_input": {
+      "message": "How many BTC would you like to buy?",
+      "input": {
+        "type": "number",
+        "placeholder": "e.g. 2",
+        "action": "buy",
+        "success_next": "buy_done",
+        "back": "trade"
+      }
+    },
+    "buy_done": {
+      "message": "Done! Your BTC has been purchased. Reload the page to see your updated balance.",
+      "options": [
+        { "label": "Trade again", "next": "trade" },
+        { "label": "Back to menu", "next": "welcome" }
+      ]
+    },
+    "sell_input": {
+      "message": "How many BTC would you like to sell?",
+      "input": {
+        "type": "number",
+        "placeholder": "e.g. 1",
+        "action": "sell",
+        "success_next": "sell_done",
+        "back": "trade"
+      }
+    },
+    "sell_done": {
+      "message": "Done! Your BTC has been sold. Reload the page to see your updated balance.",
+      "options": [
+        { "label": "Trade again", "next": "trade" },
+        { "label": "Back to menu", "next": "welcome" }
+      ]
+    },
+
+    "account": {
+      "message": "What would you like to update?",
+      "options": [
+        { "label": "Change Password", "next": "password_input" },
+        { "label": "Change Email", "next": "email_input" },
+        { "label": "← Back", "next": "welcome" }
+      ]
+    },
+    "password_input": {
+      "message": "Enter your new password:",
+      "input": {
+        "type": "password",
+        "placeholder": "New password",
+        "action": "update_password",
+        "success_next": "password_done",
+        "back": "account"
+      }
+    },
+    "password_done": {
+      "message": "Your password has been updated.",
+      "options": [
+        { "label": "Account Settings", "next": "account" },
+        { "label": "Back to menu", "next": "welcome" }
+      ]
+    },
+    "email_input": {
+      "message": "Enter your new email:",
+      "input": {
+        "type": "email",
+        "placeholder": "New email address",
+        "action": "update_email",
+        "success_next": "email_done",
+        "back": "account"
+      }
+    },
+    "email_done": {
+      "message": "Your email has been updated.",
+      "options": [
+        { "label": "Account Settings", "next": "account" },
+        { "label": "Back to menu", "next": "welcome" }
+      ]
+    },
+
+    "learn": {
+      "message": "What would you like to know?",
+      "options": [
+        { "label": "What is Bitcoin?", "next": "bitcoin_info" },
+        { "label": "What is Cryptocurrency?", "next": "crypto_info" },
+        { "label": "What is Crypto used for?", "next": "crypto_purpose" },
+        { "label": "← Back", "next": "welcome" }
+      ]
+    },
+    "bitcoin_info": {
+      "message": "Bitcoin is a decentralized digital currency transferred on a peer-to-peer network. Transactions are verified through cryptography and recorded in a public blockchain.",
+      "options": [
+        { "label": "More questions", "next": "learn" },
+        { "label": "Back to menu", "next": "welcome" }
+      ]
+    },
+    "crypto_info": {
+      "message": "Cryptocurrency is a digital payment system that doesn't rely on banks to verify transactions. It's a peer-to-peer system enabling anyone to send and receive payments.",
+      "options": [
+        { "label": "More questions", "next": "learn" },
+        { "label": "Back to menu", "next": "welcome" }
+      ]
+    },
+    "crypto_purpose": {
+      "message": "Cryptocurrencies are intended for payments and transmitting value across a decentralized network. Many coins are classified as value tokens.",
+      "options": [
+        { "label": "More questions", "next": "learn" },
+        { "label": "Back to menu", "next": "welcome" }
+      ]
+    },
+
+    "freetext": {
+      "message": "Sure, go ahead and ask me anything.",
+      "freetext": true,
+      "back": "welcome"
+    }
+  }
+}
