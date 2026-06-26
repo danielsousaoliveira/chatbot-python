@@ -35,6 +35,8 @@ interface Flow {
 
 const flow = flowData as Flow
 
+const TRADE_ACTIONS: FlowInput['action'][] = ['buy', 'sell']
+
 // ── Action API calls ──────────────────────────────────────────────────────────
 
 async function executeAction(action: FlowInput['action'], value: string): Promise<void> {
@@ -64,7 +66,7 @@ function resolveMessage(raw: string, name: string): string {
 }
 
 export default function ChatWidget() {
-  const { user } = useAuth()
+  const { user, refreshUser } = useAuth()
   const firstName = user?.name?.split(' ')[0] ?? 'there'
 
   const startNode = flow.nodes[flow.start]
@@ -107,6 +109,7 @@ export default function ChatWidget() {
     setInputValue('')
     try {
       await executeAction(action, inputValue.trim())
+      if (TRADE_ACTIONS.includes(action)) await refreshUser()
       setNodeId(success_next)
       pushBotMessage(success_next)
     } catch (err: unknown) {
