@@ -20,8 +20,17 @@ from fastapi.responses import JSONResponse
 from jose import JWTError, jwt
 
 from chatbot import communicate
-from db import create_user, get_balance, get_user
-from models import LoginRequest, PredictRequest, PredictResponse, RegisterRequest, UserContext
+from db import create_user, get_balance, get_user, updateBalance, updateEmail, updatePassword
+from models import (
+    LoginRequest,
+    PredictRequest,
+    PredictResponse,
+    RegisterRequest,
+    TradeRequest,
+    UpdateEmailRequest,
+    UpdatePasswordRequest,
+    UserContext,
+)
 
 load_dotenv()
 
@@ -143,13 +152,65 @@ def home(current_user: Annotated[UserContext, Depends(get_current_user_api)]):
     })
 
 
-## Predict ##
+## Predict (freetext fallback only) ##
 
 @app.post('/crexusers/predict', name='predict', response_model=PredictResponse)
 def predict(
     body: PredictRequest,
     current_user: Annotated[UserContext, Depends(get_current_user_api)],
 ):
-    """Send a chat message and receive an NLP-generated bot response."""
+    """Freetext fallback: match input against intent embeddings and return a response."""
     answer = communicate(body.message, id=current_user.id, name=current_user.name)
     return PredictResponse(answer=answer)
+
+
+## Trade ##
+
+@app.post('/crexusers/trade/buy', name='trade_buy')
+def trade_buy(
+    body: TradeRequest,
+    current_user: Annotated[UserContext, Depends(get_current_user_api)],
+):
+    """Buy BTC: increase the user's balance by the given amount."""
+    if body.amount <= 0:
+        raise HTTPException(status_code=400, detail='Amount must be greater than zero.')
+    updateBalance(current_user.id, body.amount, True)
+    return JSONResponse(content={'message': 'Purchase successful.'})
+
+
+@app.post('/crexusers/trade/sell', name='trade_sell')
+def trade_sell(
+    body: TradeRequest,
+    current_user: Annotated[UserContext, Depends(get_current_user_api)],
+):
+    """Sell BTC: decrease the user's balance by the given amount (floors at 0)."""
+    if body.amount <= 0:
+        raise HTTPException(status_code=400, detail='Amount must be greater than zero.')
+    updateBalance(current_user.id, body.amount, False)
+    return JSONResponse(content={'message': 'Sale successful.'})
+
+
+## Account ##
+
+@app.post('/crexusers/account/password', name='account_password')
+def account_password(
+    body: UpdatePasswordRequest,
+    current_user: Annotated[UserContext, Depends(get_current_user_api)],
+):
+    """Update the authenticated user's password."""
+    if not body.password:
+        raise HTTPException(status_code=400, detail='Password cannot be empty.')
+    updatePassword(current_user.id, body.password)
+    return JSONResponse(content={'message': 'Password updated.'})
+
+
+@app.post('/crexusers/account/email', name='account_email')
+def account_email(
+    body: UpdateEmailRequest,
+    current_user: Annotated[UserContext, Depends(get_current_user_api)],
+):
+    """Update the authenticated user's email address."""
+    if not re.match(r'[^@]+@[^@]+\.[^@]+', body.email):
+        raise HTTPException(status_code=400, detail='Invalid email address.')
+    updateEmail(current_user.id, body.email)
+    return JSONResponse(content={'message': 'Email updated.'})

@@ -36,3 +36,15 @@ class PredictRequest(BaseModel):
 
 class PredictResponse(BaseModel):
     answer: str
+
+
+class TradeRequest(BaseModel):
+    amount: int
+
+
+class UpdatePasswordRequest(BaseModel):
+    password: str
+
+
+class UpdateEmailRequest(BaseModel):
+    email: str
