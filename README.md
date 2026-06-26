@@ -40,7 +40,7 @@ Interactive Swagger UI is available when the backend is running:
 cp .env.example .env
 # Set SECRET_KEY to a long random string in .env
 
-docker-compose up --build
+docker-compose up --build -d
 ```
 
 - Frontend: http://localhost:3000
